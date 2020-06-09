@@ -1,48 +1,49 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
+// Classe abstrata
 class Jogador{
     string nome;
-    int ataque, passe, defesa;
+    int ataque, passe, defesa, modificador;
 protected:
-    Jogador(string nome, int ataque, int passe, int defesa):
-    nome(nome), ataque(ataque), passe(passe), defesa(defesa){}
+    Jogador(string nome, int ataque, int passe, int defesa, int modificador):
+    nome(nome), ataque(ataque), passe(passe), defesa(defesa), modificador(modificador){}
 public:
     int getAtaque(){ return ataque; }
     int getPasse(){ return passe; }
     int getDefesa(){ return defesa; }
-    virtual int pegarHabilidadeIndividual(){}
+    int getModificador(){ return modificador; }
+    virtual int pegarHabilidadeIndividual(){}  // vínculo dinâmico, pois queremos usar o método das subclasses
 };
 
 class Levantador:public Jogador{
-    int melhorjogador;
 public:
-    Levantador(string nome, int ataque, int passe, int defesa, int melhorjogador):
-    Jogador(nome, ataque, passe, defesa), melhorjogador(melhorjogador){}
+    Levantador(string nome, int ataque, int passe, int defesa, int modificador):
+    Jogador(nome, ataque, passe, defesa, modificador){}
     int pegarHabilidadeIndividual(){
-        return getAtaque() + 6*getPasse() + 3*getDefesa() + 10*melhorjogador;
+        return getAtaque() + 6*getPasse() + 3*getDefesa() + 10*getModificador();
     }
 };
 
 class Oposto:public Jogador{
-    int maisMarcouPontos;
 public:
-    Oposto(string nome, int ataque, int passe, int defesa, int maisMarcouPontos):
-    Jogador(nome, ataque, passe, defesa), maisMarcouPontos(maisMarcouPontos){}
+    Oposto(string nome, int ataque, int passe, int defesa, int modificador):
+    Jogador(nome, ataque, passe, defesa, modificador){}
     int pegarHabilidadeIndividual(){
-        return 6*getAtaque() + getPasse() + 3*getDefesa() + 20*maisMarcouPontos;
+        return 6*getAtaque() + getPasse() + 3*getDefesa() + 20*getModificador();
     }
 };
 
 class Libero:public Jogador{
-    int melhorQualPasse;
 public:
-    Libero(string nome, int ataque, int passe, int defesa, int melhorQualPasse):
-    Jogador(nome, ataque, passe, defesa), melhorQualPasse(melhorQualPasse){}
+    Libero(string nome, int ataque, int passe, int defesa, int modificador):
+    Jogador(nome, ataque, passe, defesa, modificador){}
     int pegarHabilidadeIndividual(){
         int pontos = 5*getPasse() + 5*getDefesa();
-        int partidas = melhorQualPasse;
+        int partidas = getModificador();
         while(partidas >= 10){
             pontos *= 2;
             partidas -= 10;
@@ -52,19 +53,18 @@ public:
 };
 
 class Meia:public Jogador{
-    int naoBloqueio;
 public:
-    Meia(string nome, int ataque, int passe, int defesa, int naoBloqueio):
-    Jogador(nome, ataque, passe, defesa), naoBloqueio(naoBloqueio){}
+    Meia(string nome, int ataque, int passe, int defesa, int modificador):
+    Jogador(nome, ataque, passe, defesa, modificador){}
     int pegarHabilidadeIndividual(){
-        return 4*getAtaque() + getPasse() + 3*getDefesa() - naoBloqueio;
+        return 4*getAtaque() + getPasse() + 3*getDefesa() - getModificador();
     }
 };
 
 class Ponta:public Jogador{
 public:
     Ponta(string nome, int ataque, int passe, int defesa):
-    Jogador(nome, ataque, passe, defesa){}
+    Jogador(nome, ataque, passe, defesa, 0){}
     int pegarHabilidadeIndividual(){
         return 4*getAtaque() + 3*getPasse() + 3*getDefesa();
     }
@@ -119,18 +119,44 @@ public:
 };
 
 class Partida{
+  	bool ponto(Time &t1, Time &t2, bool saque){  // saque: false -> time t1 saca; true -> time t2 saca
+  		float hab1 = t1.pegarHabilidadeTotal(), hab2 = t2.pegarHabilidadeTotal(), aleatorio;
+      	if (saque) hab2 *= 1.25;
+      	else hab1 *= 1.25; 
+    	aleatorio = (rand()%((int) hab1*100 + (int) hab2*100) + 1) / 100;
+		if (aleatorio <= hab1) return false; 
+		return true;
+  	}
+  	bool realizarSet(Time &t1, Time &t2, int set1, int set2){
+  	    int ponto1 = 0, ponto2 = 0, total = 25;
+  	    bool saque;
+  	    if ((set1 + set2)%2) saque = false;
+  	    else saque = true;
+  	    if (set1 == 2 && set2 == 2) total = 15;
+  	    while ((ponto1 < total && ponto2 < total) || (ponto1 - ponto2 < 2 && ponto1 - ponto2 > -2)){
+  	        saque = ponto(t1, t2, saque);
+  	        ponto1 += (int) !saque;
+  	        ponto2 += (int) saque;
+  	        cout << ponto1 << " X " << ponto2 << endl;
+  	    }
+  	    cout << endl;
+  	    if (ponto1 > ponto2) return false;
+  	    else return true;
+  	}
 public:
     bool realizar(Time &t1, Time &t2){
+        int set1 = 0, set2 = 0;
+        cout << t1.getNome() << " X " << t2.getNome() << endl;
         if(t1.getnJogadores()==7 && t2.getnJogadores()==7){
-            if(t1.pegarHabilidadeTotal()>t2.pegarHabilidadeTotal()){
-                cout << t1.getNome();
+            while(set1 != 3 && set2 != 3){
+                cout << endl << set1 + set2 + 1 << "º Set:" << endl;
+                if(realizarSet(t1, t2, set1, set2)) set2++;
+                else set1++;
+                cout << "Placar: " << set1 << " X " << set2 << endl;
             }
-            else if(t1.pegarHabilidadeTotal()<t2.pegarHabilidadeTotal()){
-                cout << t2.getNome();
-            }
-            else{
-                cout << "empate" << endl;
-            }
+            cout << endl << "Vencedor: ";
+            if(set1 == 3) cout << t1.getNome() << endl;
+            else cout << t2.getNome() << endl;
             return true;
         }
         return false;
@@ -138,6 +164,7 @@ public:
 };
 
 int main(){
+    srand(time(NULL));
     //Time 1
     Time time1("X-Men");
     Levantador le1("Carlos", 3, 2, 1, 5);
@@ -193,11 +220,8 @@ int main(){
     cout << "Pontuação total do Time 2: " << time2.pegarHabilidadeTotal() << endl << endl;
 
     //Partida
-    cout << "Partida: " << time1.getNome() << " versus " << time2.getNome() << endl;
-    cout << "O vencedor é: ";
     Partida p;
     p.realizar(time1, time2);
-    cout << endl;
 
     return 0;
 }
