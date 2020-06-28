@@ -58,6 +58,9 @@ int main(){
 
     cout << "Pontuação total do Time 2: " << time2.pegarHabilidadeTotal() << endl << endl;
 
+    Jogador *j = &le3;
+    cout << j->getPosicao() << endl;
+    
     //Partida
     Partida p;
     p.realizar(time1, time2);

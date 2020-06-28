@@ -5,6 +5,12 @@
 
 using namespace std;
 
+int Levantador::posicao = 0;
+int Oposto::posicao = 1;
+int Libero::posicao = 2;
+int Meia::posicao = 3;
+int Ponta::posicao = 4;
+
 int Levantador::pegarHabilidadeIndividual(){
     return getAtaque() + 6*getPasse() + 3*getDefesa() + 10*getModificador();
 }
@@ -67,6 +73,11 @@ int Time::pegarHabilidadeTotal(){
     return -1;
 }
 
+inline Jogador *Time::pegarJogador(int pos){
+    if(nJogadores >= pos) return jogadores[pos];
+    return NULL;
+}
+
 bool Partida::ponto(Time &t1, Time &t2, bool saque){
     float hab1 = t1.pegarHabilidadeTotal(), hab2 = t2.pegarHabilidadeTotal(), aleatorio;
     if (saque) hab2 *= 1.25;
@@ -98,6 +109,22 @@ bool Partida::realizar(Time &t1, Time &t2){
     int set1 = 0, set2 = 0;
     cout << t1.getNome() << " X " << t2.getNome() << endl;
     if(t1.getnJogadores()==7 && t2.getnJogadores()==7){
+        int checarPosicao[10] = {0};
+        for(int i=0; i<7; i++){
+            Jogador *j;
+            j = t1.pegarJogador(i);
+            checarPosicao[j->getPosicao()]++;
+            j = t2.pegarJogador(i);
+            checarPosicao[j->getPosicao() + 5]++;
+        }
+        for(int i=0; i<10; i++){
+            if(i%5 == 3 || i%5 == 4){
+                if(checarPosicao[i] != 2) return false;
+            }
+            else{
+                if(checarPosicao[i] != 1) return false;
+            }
+        }
         while(set1 != 3 && set2 != 3){
             cout << endl << set1 + set2 + 1 << "º Set:" << endl;
             if(realizarSet(t1, t2, set1, set2)) set2++;
