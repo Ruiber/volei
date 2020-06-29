@@ -11,11 +11,11 @@ int Libero::posicao = 2;
 int Meia::posicao = 3;
 int Ponta::posicao = 4;
 
-int Levantador::pegarHabilidadeIndividual(){
+inline int Levantador::pegarHabilidadeIndividual(){
     return getAtaque() + 6*getPasse() + 3*getDefesa() + 10*getModificador();
 }
 
-int Oposto::pegarHabilidadeIndividual(){
+inline int Oposto::pegarHabilidadeIndividual(){
     return 6*getAtaque() + getPasse() + 3*getDefesa() + 20*getModificador();
 }
 
@@ -29,11 +29,11 @@ int Libero::pegarHabilidadeIndividual(){
     return pontos;
 }
 
-int Meia::pegarHabilidadeIndividual(){
+inline int Meia::pegarHabilidadeIndividual(){
     return 4*getAtaque() + getPasse() + 3*getDefesa() - getModificador();
 }
 
-int Ponta::pegarHabilidadeIndividual(){
+inline int Ponta::pegarHabilidadeIndividual(){
     return 4*getAtaque() + 3*getPasse() + 3*getDefesa();
 }
 
@@ -54,7 +54,7 @@ bool Time::inserirJogador(Jogador &j){
     return false;
 }
 
-bool Time::alterarJogador(int n, Jogador &j){
+inline bool Time::alterarJogador(int n, Jogador &j){
     if(n <= nJogadores){
         jogadores[n] = &j;
         return true;
@@ -78,7 +78,7 @@ inline Jogador *Time::pegarJogador(int pos){
     return NULL;
 }
 
-bool Partida::ponto(Time &t1, Time &t2, bool saque){
+inline bool Partida::ponto(Time &t1, Time &t2, bool saque){
     float hab1 = t1.pegarHabilidadeTotal(), hab2 = t2.pegarHabilidadeTotal(), aleatorio;
     if (saque) hab2 *= 1.25;
     else hab1 *= 1.25; 

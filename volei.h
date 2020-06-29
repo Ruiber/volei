@@ -7,7 +7,6 @@ class Jogador{
     int posicao;
     std::string nome;
     int ataque, passe, defesa, modificador;
-    friend class Partida;
 protected:
     Jogador(std::string nome, int ataque, int passe, int defesa, int modificador):
     nome(nome), ataque(ataque), passe(passe), defesa(defesa), modificador(modificador){}

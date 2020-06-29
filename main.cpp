@@ -57,13 +57,10 @@ int main(){
     time2.inserirJogador(po4);
 
     cout << "Pontuação total do Time 2: " << time2.pegarHabilidadeTotal() << endl << endl;
-
-    Jogador *j = &le3;
-    cout << j->getPosicao() << endl;
     
     //Partida
     Partida p;
-    p.realizar(time1, time2);
+    if (!p.realizar(time1, time2)) cout << "Time inválido" << endl;
 
     return 0;
 }
